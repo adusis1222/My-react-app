@@ -1,0 +1,873 @@
+import React, { useState } from "react";
+import {
+  Zap, BookOpen, Plug, GitBranch, ShieldCheck, HelpCircle, Info,
+  Home, ChevronRight, ArrowLeft, Globe, PlayCircle, CheckCircle2,
+  XCircle, RotateCcw, Award, Lightbulb, Gauge, Activity
+} from "lucide-react";
+
+/* ------------------------------------------------------------------ */
+/* Content — every string exists in both Amharic and English           */
+/* ------------------------------------------------------------------ */
+
+const UI = {
+  en: {
+    appName: "Addu Electrical Learning",
+    tagline: "Learn Electrical Devices Easily",
+    home: "Home",
+    learn: "Learn",
+    devices: "Devices",
+    diagrams: "Diagrams",
+    quiz: "Quiz",
+    safety: "Safety",
+    about: "About",
+    basicElectricity: "Basic Electricity",
+    electricalDevices: "Electrical Devices",
+    circuitDiagrams: "Circuit Diagrams",
+    electricalSafety: "Electrical Safety",
+    heroTitle: "Learn Electrical Devices, Basic Electricity, Diagrams and Safety",
+    chooseLanguage: "Choose Language",
+    startLearning: "Start Learning",
+    watchVideo: "Watch Video",
+    function: "Function",
+    working: "Working",
+    safetyTab: "Safety",
+    overview: "Overview",
+    chooseCategory: "Choose a Quiz Category",
+    testKnowledge: "Test Your Knowledge!",
+    questions: "Questions",
+    submit: "Submit",
+    next: "Next",
+    finish: "Finish",
+    yourScore: "Your Score",
+    tryAgain: "Try Again",
+    backToQuiz: "Back to Quiz Menu",
+    developedBy: "Developed by Beki",
+    safetyTips: "Safety Tips",
+    of: "of",
+    correct: "Correct!",
+    incorrect: "Not quite",
+  },
+  am: {
+    appName: "አዱ የኤሌክትሪክ ትምህርት",
+    tagline: "ኤሌክትሪካል መሳሪያዎችን በቀላሉ ይማሩ",
+    home: "መነሻ",
+    learn: "ትምህርት",
+    devices: "መሳሪያዎች",
+    diagrams: "ዲያግራሞች",
+    quiz: "ፈተና",
+    safety: "ደህንነት",
+    about: "ስለ እኛ",
+    basicElectricity: "መሰረታዊ ኤሌክትሪክ",
+    electricalDevices: "የኤሌክትሪክ መሳሪያዎች",
+    circuitDiagrams: "የወረዳ ዲያግራሞች",
+    electricalSafety: "የኤሌክትሪክ ደህንነት",
+    heroTitle: "ኤሌክትሪካል መሳሪያዎችን፣ መሰረታዊ ኤሌክትሪክን፣ ዲያግራሞችን እና ደህንነትን ይማሩ",
+    chooseLanguage: "ቋንቋ ይምረጡ",
+    startLearning: "ትምህርት ጀምር",
+    watchVideo: "ቪዲዮ ይመልከቱ",
+    function: "አገልግሎት",
+    working: "አሰራር",
+    safetyTab: "ደህንነት",
+    overview: "አጠቃላይ",
+    chooseCategory: "የፈተና አይነት ይምረጡ",
+    testKnowledge: "እውቀትዎን ይፈትሹ!",
+    questions: "ጥያቄዎች",
+    submit: "አስገባ",
+    next: "ቀጣይ",
+    finish: "ጨርስ",
+    yourScore: "ውጤትዎ",
+    tryAgain: "እንደገና ሞክር",
+    backToQuiz: "ወደ ፈተና ዝርዝር",
+    developedBy: "በቤኪ የተሰራ",
+    safetyTips: "የደህንነት ምክሮች",
+    of: "ከ",
+    correct: "ትክክል!",
+    incorrect: "ትክክል አይደለም",
+  },
+};
+
+const BASICS = [
+  {
+    id: "voltage",
+    icon: Zap,
+    en: { title: "Voltage (V)", desc: "The force that pushes electric current through a circuit, measured in volts." },
+    am: { title: "ቮልቴጅ (V)", desc: "የኤሌክትሪክ ኃይልን በወረዳ ውስጥ የሚገፋ ሃይል፣ በቮልት ይለካል።" },
+  },
+  {
+    id: "current",
+    icon: Activity,
+    en: { title: "Current (A)", desc: "The flow of electric charge through a conductor, measured in amperes." },
+    am: { title: "ጅረት (A)", desc: "በሽቦ ውስጥ የሚፈስ የኤሌክትሪክ ክፍያ፣ በአምፔር ይለካል።" },
+  },
+  {
+    id: "resistance",
+    icon: Gauge,
+    en: { title: "Resistance (Ω)", desc: "Opposition to the flow of current, measured in ohms." },
+    am: { title: "ተቃውሞ (Ω)", desc: "የጅረት ፍሰትን የሚያግድ ሃይል፣ በኦም ይለካል።" },
+  },
+  {
+    id: "power",
+    icon: Lightbulb,
+    en: { title: "Power (W)", desc: "The rate of doing electrical work, measured in watts." },
+    am: { title: "ኃይል (W)", desc: "የኤሌክትሪክ ስራ የሚሰራበት ፍጥነት፣ በዋት ይለካል።" },
+  },
+];
+
+const DEVICES = [
+  {
+    id: "mcb",
+    name: { en: "MCB", am: "MCB" },
+    full: { en: "Miniature Circuit Breaker", am: "አነስተኛ የወረዳ መቆራረጫ" },
+    tabs: {
+      overview: {
+        en: "An MCB automatically switches off electrical circuits during an overload or short circuit fault, protecting wiring from damage.",
+        am: "MCB በጭነት መብዛት ወይም በአጭር ዙር ችግር ጊዜ ወረዳውን በራሱ ያጠፋል፣ ሽቦውንም ከጉዳት ይጠብቃል።",
+      },
+      function: {
+        en: "Protects circuits from overload and short-circuit currents by breaking the connection automatically.",
+        am: "ወረዳን ከጭነት መብዛትና ከአጭር ዙር ጅረት ይጠብቃል፣ ግንኙነቱን በራስ-ሰር በማቋረጥ።",
+      },
+      working: {
+        en: "Uses a bimetallic strip for overload trips and an electromagnet for short-circuit trips, tripping the switch open.",
+        am: "ለጭነት መብዛት ባለ-ብረት ስትሪፕ፣ ለአጭር ዙር ደግሞ ኤሌክትሮማግኔት ተጠቅሞ መቀያየሪያውን ይከፍታል።",
+      },
+      safety: {
+        en: "Always match the MCB rating to the circuit's load. Never bypass a tripped MCB — find the fault first.",
+        am: "የMCB መጠን ከወረዳው ጭነት ጋር ይመጣጠን። የተቆራረጠ MCB በቀጥታ አያገናኙ — መጀመሪያ ችግሩን ያግኙ።",
+      },
+    },
+  },
+  {
+    id: "mccb",
+    name: { en: "MCCB", am: "MCCB" },
+    full: { en: "Moulded Case Circuit Breaker", am: "ማውልዲድ ኬዝ የወረዳ መቆራረጫ" },
+    tabs: {
+      overview: {
+        en: "A larger breaker used for higher current circuits, with adjustable trip settings for industrial applications.",
+        am: "ለከፍተኛ ጅረት ወረዳዎች የሚያገለግል ትልቅ መቆራረጫ፣ ለኢንዱስትሪ አገልግሎት ተስተካካይ ቅንብር ያለው።",
+      },
+      function: {
+        en: "Provides protection and manual switching for higher current circuits than a standard MCB.",
+        am: "ከመደበኛ MCB የበለጠ ከፍተኛ ጅረት ላላቸው ወረዳዎች ጥበቃና በእጅ መቀያየር ይሰጣል።",
+      },
+      working: {
+        en: "Combines thermal and magnetic tripping mechanisms with adjustable current and time settings.",
+        am: "የሙቀትና የመግነጢሳዊ መቁረጫ ዘዴዎችን ከተስተካካይ ጅረትና ጊዜ ቅንብር ጋር ያዋህዳል።",
+      },
+      safety: {
+        en: "Only qualified technicians should adjust trip settings. Verify the circuit is isolated before servicing.",
+        am: "ብቃት ያለው ባለሙያ ብቻ ቅንብሮችን ማስተካከል አለበት። ከማገልገልዎ በፊት ወረዳው መቋረጡን ያረጋግጡ።",
+      },
+    },
+  },
+  {
+    id: "rccb",
+    name: { en: "RCCB", am: "RCCB" },
+    full: { en: "Residual Current Circuit Breaker", am: "የቀሪ ጅረት መቆራረጫ" },
+    tabs: {
+      overview: {
+        en: "Detects leakage current to earth and disconnects the supply quickly to prevent electric shock.",
+        am: "ወደ መሬት የሚፈስ ቀሪ ጅረትን በመለየት አቅርቦትን በፍጥነት በማቋረጥ ከኤሌክትሪክ ድንጋጤ ይከላከላል።",
+      },
+      function: {
+        en: "Protects people from electric shock caused by earth leakage faults.",
+        am: "በመሬት ፍሳሽ ችግር ምክንያት ከሚደርስ የኤሌክትሪክ ድንጋጤ ሰዎችን ይጠብቃል።",
+      },
+      working: {
+        en: "Compares the current in the live and neutral wires; any imbalance trips the device within milliseconds.",
+        am: "በላይቭ እና በኒውትራል ሽቦዎች ውስጥ ያለውን ጅረት ያወዳድራል፤ ልዩነት ካለ በሚሊሰከንድ ውስጥ ይቆራረጣል።",
+      },
+      safety: {
+        en: "Test the RCCB monthly using its test button to confirm it trips correctly.",
+        am: "RCCB በትክክል መቆራረጡን ለማረጋገጥ በወር አንዴ የሙከራ ቁልፉን ይጫኑ።",
+      },
+    },
+  },
+  {
+    id: "contactor",
+    name: { en: "Contactor", am: "ኮንታክተር" },
+    full: { en: "Electromagnetic Contactor", am: "ኤሌክትሮማግኔቲክ ኮንታክተር" },
+    tabs: {
+      overview: {
+        en: "An electrically controlled switch used for switching motors and heavy loads on and off.",
+        am: "ሞተሮችንና ከባድ ጭነቶችን ለማብራትና ለማጥፋት የሚያገለግል በኤሌክትሪክ የሚቆጣጠር መቀያየሪያ።",
+      },
+      function: {
+        en: "Switches high-power circuits using a low-power control signal.",
+        am: "ዝቅተኛ ኃይል ባለው መቆጣጠሪያ ምልክት ከፍተኛ ኃይል ያለውን ወረዳ ይቀያይራል።",
+      },
+      working: {
+        en: "A coil energizes to pull the contacts closed, completing the power circuit while the coil stays energized.",
+        am: "ጠመዝማዛው ኃይል ሲያገኝ ግንኙነቶቹን ይዘጋል፤ ጠመዝማዛው ኃይል እስካገኘ ድረስ ወረዳው ይዘጋል።",
+      },
+      safety: {
+        en: "Match contactor rating to motor starting current, and check contacts for wear regularly.",
+        am: "የኮንታክተሩን መጠን ከሞተሩ መነሻ ጅረት ጋር ያመሳክሩ፣ ግንኙነቶቹንም አዘውትረው ይመልከቱ።",
+      },
+    },
+  },
+  {
+    id: "relay",
+    name: { en: "Relay", am: "ሪሌይ" },
+    full: { en: "Electromagnetic Relay", am: "ኤሌክትሮማግኔቲክ ሪሌይ" },
+    tabs: {
+      overview: {
+        en: "A small electromagnetic switch used to control a circuit using a separate low-power signal.",
+        am: "የተለየ ዝቅተኛ ኃይል ምልክት ተጠቅሞ ወረዳን ለመቆጣጠር የሚያገለግል አነስተኛ ኤሌክትሮማግኔቲክ መቀያየሪያ።",
+      },
+      function: {
+        en: "Isolates and controls one circuit from another, often used for automation and protection logic.",
+        am: "አንድን ወረዳ ከሌላው ይለያል እና ይቆጣጠራል፣ ብዙ ጊዜም ለራስ-ሰር ስራና ለጥበቃ ይውላል።",
+      },
+      working: {
+        en: "A small current energizes a coil, which moves a lever to open or close separate contacts.",
+        am: "አነስተኛ ጅረት ጠመዝማዛውን ያነቃቃል፣ ይህም ሌላ ገለልተኛ ግንኙነት ለመክፈት ወይም ለመዝጋት ሌቨር ያንቀሳቅሳል።",
+      },
+      safety: {
+        en: "Check the coil voltage rating matches your control supply before wiring.",
+        am: "ከመሸቦ በፊት የጠመዝማዛው የቮልቴጅ መጠን ከቁጥጥር አቅርቦትዎ ጋር መመሳሰሉን ያረጋግጡ።",
+      },
+    },
+  },
+  {
+    id: "timer",
+    name: { en: "Timer", am: "ታይመር" },
+    full: { en: "Time Switch / Timer", am: "የጊዜ መቀያየሪያ / ታይመር" },
+    tabs: {
+      overview: {
+        en: "A device that switches a circuit on or off after a preset time delay.",
+        am: "ወረዳን ቀድሞ በተቀመጠ የጊዜ ገደብ መሰረት የሚያበራ ወይም የሚያጠፋ መሳሪያ።",
+      },
+      function: {
+        en: "Automates repetitive on/off switching for lighting, motors, or industrial processes.",
+        am: "ለመብራት፣ ለሞተር ወይም ለኢንዱስትሪ ስራዎች ተደጋጋሚ ማብራት/ማጥፋትን በራስ-ሰር ያደርጋል።",
+      },
+      working: {
+        en: "Uses an internal clock mechanism (mechanical or digital) to trigger contacts at set intervals.",
+        am: "ውስጣዊ የሰዓት ዘዴ (መካኒካል ወይም ዲጂታል) ተጠቅሞ ግንኙነቶችን በተወሰነ ጊዜ ያንቀሳቅሳል።",
+      },
+      safety: {
+        en: "Set the correct time zone and schedule carefully to avoid unexpected equipment start-up.",
+        am: "ያልተጠበቀ የመሳሪያ መነሳት እንዳይኖር ትክክለኛውን ሰዓትና መርሃ ግብር በጥንቃቄ ያስቀምጡ።",
+      },
+    },
+  },
+];
+
+const DIAGRAMS = [
+  {
+    id: "lighting",
+    en: { name: "Lighting Circuit", desc: "How a single switch controls a lamp from one point." },
+    am: { name: "የመብራት ወረዳ", desc: "አንድ መቀያየሪያ አንድ መብራትን ከአንድ ቦታ እንዴት እንደሚቆጣጠር።" },
+  },
+  {
+    id: "power",
+    en: { name: "Power Circuit", desc: "Wiring layout for socket outlets supplying appliances." },
+    am: { name: "የኃይል ወረዳ", desc: "ለመሳሪያዎች ኃይል የሚያቀርቡ የሶኬት መውጫዎች የሽቦ አቀማመጥ።" },
+  },
+  {
+    id: "motor",
+    en: { name: "Motor Control Circuit", desc: "Contactor and overload wiring for starting a motor safely." },
+    am: { name: "የሞተር መቆጣጠሪያ ወረዳ", desc: "ሞተርን በደህንነት ለማስነሳት የኮንታክተርና የጭነት ትርፍ ሽቦ አቀማመጥ።" },
+  },
+  {
+    id: "twoway",
+    en: { name: "Two Way Switch", desc: "Control one lamp from two different switch locations." },
+    am: { name: "ባለ ሁለት መንገድ መቀያየሪያ", desc: "አንድን መብራት ከሁለት የተለያዩ ቦታዎች መቆጣጠር።" },
+  },
+  {
+    id: "stardelta",
+    en: { name: "Star Delta Starter", desc: "Reduces motor starting current by switching from star to delta connection." },
+    am: { name: "ስታር ዴልታ ስታርተር", desc: "ከስታር ወደ ዴልታ ግንኙነት በመቀየር የሞተር መነሻ ጅረትን ይቀንሳል።" },
+  },
+];
+
+const SAFETY_TIPS = [
+  {
+    en: "Always switch off and isolate the circuit before working on it.",
+    am: "በወረዳ ላይ ከመስራትዎ በፊት ሁልጊዜ ያጥፉና ይለዩ።",
+  },
+  {
+    en: "Never work on live wiring with wet hands or in wet conditions.",
+    am: "እርጥብ እጅ ወይም እርጥብ ቦታ ላይ ሆነው በቀጥታ ኤሌክትሪክ ሽቦ ላይ በፍጹም አይስሩ።",
+  },
+  {
+    en: "Use insulated tools rated for electrical work.",
+    am: "ለኤሌክትሪክ ስራ የተመዘነ የተከለለ መሳሪያ ይጠቀሙ።",
+  },
+  {
+    en: "Install RCCBs and correctly rated MCBs on every circuit.",
+    am: "በእያንዳንዱ ወረዳ ላይ RCCB እና ትክክለኛ መጠን ያለው MCB ይግጠሙ።",
+  },
+  {
+    en: "Never overload a socket outlet with too many appliances.",
+    am: "አንድ ሶኬት በብዙ መሳሪያዎች በፍጹም አይጫኑ።",
+  },
+  {
+    en: "Keep water and flammable materials away from electrical panels.",
+    am: "ውሃና ተቀጣጣይ ነገሮችን ከኤሌክትሪክ ፓነሎች ያርቁ።",
+  },
+];
+
+const QUIZ_CATEGORIES = [
+  {
+    id: "basics",
+    color: "#1552B8",
+    en: { name: "Basic Electricity Quiz" },
+    am: { name: "የመሰረታዊ ኤሌክትሪክ ፈተና" },
+    questions: [
+      {
+        en: { q: "What unit measures electric current?", options: ["Volt", "Ampere", "Ohm", "Watt"] },
+        am: { q: "የኤሌክትሪክ ጅረት በምን ይለካል?", options: ["ቮልት", "አምፔር", "ኦም", "ዋት"] },
+        answer: 1,
+      },
+      {
+        en: { q: "Resistance opposes the flow of what?", options: ["Voltage", "Power", "Current", "Frequency"] },
+        am: { q: "ተቃውሞ የምንድን ፍሰት ያግዳል?", options: ["ቮልቴጅ", "ኃይል", "ጅረት", "ፍሪኩዌንሲ"] },
+        answer: 2,
+      },
+      {
+        en: { q: "Power is measured in which unit?", options: ["Watt", "Ampere", "Ohm", "Volt"] },
+        am: { q: "ኃይል በየትኛው መለኪያ ይለካል?", options: ["ዋት", "አምፔር", "ኦም", "ቮልት"] },
+        answer: 0,
+      },
+      {
+        en: { q: "Voltage is best described as the...", options: ["Flow of charge", "Force pushing current", "Rate of work", "Opposition to flow"] },
+        am: { q: "ቮልቴጅ በተሻለ ሁኔታ የሚገለጸው እንደ...", options: ["የክፍያ ፍሰት", "ጅረትን የሚገፋ ሃይል", "የስራ ፍጥነት", "ለፍሰት ተቃውሞ"] },
+        answer: 1,
+      },
+    ],
+  },
+  {
+    id: "devices",
+    color: "#0F9D58",
+    en: { name: "Electrical Devices Quiz" },
+    am: { name: "የኤሌክትሪክ መሳሪያዎች ፈተና" },
+    questions: [
+      {
+        en: { q: "Which device protects against earth leakage current?", options: ["MCB", "RCCB", "Timer", "Relay"] },
+        am: { q: "ከመሬት ፍሳሽ ጅረት የሚከላከለው የትኛው መሳሪያ ነው?", options: ["MCB", "RCCB", "ታይመር", "ሪሌይ"] },
+        answer: 1,
+      },
+      {
+        en: { q: "A contactor is mainly used to switch what kind of load?", options: ["Small sensors", "Motors and heavy loads", "Timers", "Batteries"] },
+        am: { q: "ኮንታክተር በዋናነት ለምን አይነት ጭነት ይውላል?", options: ["ትንንሽ ሴንሰሮች", "ሞተሮችና ከባድ ጭነቶች", "ታይመሮች", "ባትሪዎች"] },
+        answer: 1,
+      },
+      {
+        en: { q: "MCCB stands for Moulded Case...", options: ["Circuit Breaker", "Control Board", "Current Balancer", "Coil Breaker"] },
+        am: { q: "MCCB ማለት ማውልዲድ ኬዝ...", options: ["ወረዳ መቆራረጫ", "መቆጣጠሪያ ቦርድ", "ጅረት ማመጣጠኛ", "ጠመዝማዛ መቆራረጫ"] },
+        answer: 0,
+      },
+    ],
+  },
+  {
+    id: "diagrams",
+    color: "#E08A00",
+    en: { name: "Circuit Diagrams Quiz" },
+    am: { name: "የወረዳ ዲያግራም ፈተና" },
+    questions: [
+      {
+        en: { q: "A two-way switch controls a lamp from how many locations?", options: ["One", "Two", "Three", "Four"] },
+        am: { q: "ባለ ሁለት መንገድ መቀያየሪያ መብራትን ከስንት ቦታ ይቆጣጠራል?", options: ["ከአንድ", "ከሁለት", "ከሶስት", "ከአራት"] },
+        answer: 1,
+      },
+      {
+        en: { q: "Star Delta starters are used to reduce what during motor start?", options: ["Voltage", "Starting current", "Resistance", "Power factor"] },
+        am: { q: "ስታር ዴልታ ስታርተር በሞተር መነሻ ወቅት የሚቀንሰው ምንድን ነው?", options: ["ቮልቴጅ", "የመነሻ ጅረት", "ተቃውሞ", "ፓወር ፋክተር"] },
+        answer: 1,
+      },
+    ],
+  },
+];
+
+/* ------------------------------------------------------------------ */
+/* Small building blocks                                               */
+/* ------------------------------------------------------------------ */
+
+function TopBar({ t, onBack, title, lang, setLang }) {
+  return (
+    <div
+      className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 text-white"
+      style={{ background: "linear-gradient(135deg,#0B2F5E,#1552B8)" }}
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        {onBack && (
+          <button onClick={onBack} className="p-1 -ml-1 rounded-full hover:bg-white/10 shrink-0" aria-label="back">
+            <ArrowLeft size={20} />
+          </button>
+        )}
+        <span className="font-bold text-[15px] truncate">{title}</span>
+      </div>
+      <button
+        onClick={() => setLang(lang === "en" ? "am" : "en")}
+        className="flex items-center gap-1 text-xs font-semibold bg-white/15 hover:bg-white/25 transition-colors px-2.5 py-1.5 rounded-full shrink-0"
+      >
+        <Globe size={13} />
+        {lang === "en" ? "አማ" : "EN"}
+      </button>
+    </div>
+  );
+}
+
+function BottomNav({ t, screen, setScreen }) {
+  const items = [
+    { id: "home", label: t.home, icon: Home },
+    { id: "basics", label: t.learn, icon: BookOpen },
+    { id: "devices", label: t.devices, icon: Plug },
+    { id: "diagrams", label: t.diagrams, icon: GitBranch },
+    { id: "quiz", label: t.quiz, icon: HelpCircle },
+  ];
+  const active = ["home", "basics", "devices", "diagrams", "quiz"].includes(screen) ? screen : null;
+  return (
+    <div className="sticky bottom-0 z-20 bg-white border-t border-slate-200 flex justify-around py-1.5 shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
+      {items.map((it) => {
+        const Icon = it.icon;
+        const isActive = active === it.id;
+        return (
+          <button
+            key={it.id}
+            onClick={() => setScreen(it.id)}
+            className="flex flex-col items-center gap-0.5 px-2 py-1 min-w-[56px]"
+          >
+            <Icon size={19} color={isActive ? "#1552B8" : "#94A3B8"} strokeWidth={isActive ? 2.4 : 2} />
+            <span className={`text-[10px] font-medium ${isActive ? "text-[#1552B8]" : "text-slate-400"}`}>
+              {it.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function SectionCard({ icon: Icon, title, subtitle, onClick, tint = "#1552B8" }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-3 w-full bg-white rounded-2xl p-3.5 border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-left"
+    >
+      <div
+        className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+        style={{ background: `${tint}18` }}
+      >
+        <Icon size={20} color={tint} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="font-semibold text-slate-800 text-[14px] truncate">{title}</div>
+        {subtitle && <div className="text-[12px] text-slate-500 truncate">{subtitle}</div>}
+      </div>
+      <ChevronRight size={17} className="text-slate-300 shrink-0" />
+    </button>
+  );
+}
+
+/* Circuit-trace divider — a small nod to PCB trace lines, ties the   */
+/* decorative language back to the subject matter itself.             */
+function TraceDivider() {
+  return (
+    <div className="flex items-center gap-2 my-5 px-1 select-none">
+      <div className="flex-1 h-px" style={{ background: "repeating-linear-gradient(90deg,#CBD5E1 0 6px,transparent 6px 10px)" }} />
+      <div className="w-1.5 h-1.5 rounded-full bg-[#1552B8]" />
+      <div className="flex-1 h-px" style={{ background: "repeating-linear-gradient(90deg,#CBD5E1 0 6px,transparent 6px 10px)" }} />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Screens                                                              */
+/* ------------------------------------------------------------------ */
+
+function HomeScreen({ t, lang, setScreen }) {
+  return (
+    <div className="p-4 pb-6">
+      <div
+        className="rounded-2xl p-5 text-white mb-5 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg,#0B2F5E 0%,#1552B8 60%,#1B6FE0 100%)" }}
+      >
+        <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-white/5" />
+        <div className="absolute -right-2 top-10 w-16 h-16 rounded-full bg-white/5" />
+        <Zap size={26} className="mb-2 text-amber-300" fill="#FCD34D" />
+        <h1 className="text-[18px] font-extrabold leading-snug mb-1">{t.heroTitle}</h1>
+        <p className="text-[12px] text-blue-100 mb-4">{t.tagline}</p>
+        <button
+          onClick={() => setScreen("basics")}
+          className="bg-white text-[#0B2F5E] font-bold text-[13px] px-4 py-2 rounded-full flex items-center gap-1.5"
+        >
+          {t.startLearning} <ChevronRight size={15} />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <SectionCard icon={BookOpen} title={t.basicElectricity} onClick={() => setScreen("basics")} tint="#1552B8" />
+        <SectionCard icon={Plug} title={t.electricalDevices} onClick={() => setScreen("devices")} tint="#0F9D58" />
+        <SectionCard icon={GitBranch} title={t.circuitDiagrams} onClick={() => setScreen("diagrams")} tint="#E08A00" />
+        <SectionCard icon={ShieldCheck} title={t.electricalSafety} onClick={() => setScreen("safety")} tint="#DC2626" />
+        <SectionCard icon={HelpCircle} title={t.quiz} onClick={() => setScreen("quiz")} tint="#7C3AED" />
+        <SectionCard icon={Info} title={t.about} onClick={() => setScreen("about")} tint="#0891B2" />
+      </div>
+    </div>
+  );
+}
+
+function BasicsScreen({ t, lang }) {
+  return (
+    <div className="p-4 space-y-3 pb-6">
+      {BASICS.map((b) => {
+        const Icon = b.icon;
+        const c = b[lang];
+        return (
+          <div key={b.id} className="flex gap-3 bg-white rounded-2xl p-3.5 border border-slate-100 shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-[#1552B8]/10 flex items-center justify-center shrink-0">
+              <Icon size={18} color="#1552B8" />
+            </div>
+            <div>
+              <div className="font-bold text-slate-800 text-[14px]">{c.title}</div>
+              <div className="text-[12.5px] text-slate-500 mt-0.5 leading-snug">{c.desc}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function DevicesScreen({ t, lang, onOpen }) {
+  return (
+    <div className="p-4 space-y-2.5 pb-6">
+      {DEVICES.map((d) => (
+        <SectionCard
+          key={d.id}
+          icon={Plug}
+          title={d.name[lang]}
+          subtitle={d.full[lang]}
+          onClick={() => onOpen(d.id)}
+          tint="#0F9D58"
+        />
+      ))}
+    </div>
+  );
+}
+
+function DeviceDetailScreen({ t, lang, device }) {
+  const [tab, setTab] = useState("overview");
+  const tabs = [
+    { id: "overview", label: t.overview },
+    { id: "function", label: t.function },
+    { id: "working", label: t.working },
+    { id: "safety", label: t.safetyTab },
+  ];
+  return (
+    <div className="pb-6">
+      <div className="p-4">
+        <div className="rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 border border-slate-100 h-32 flex items-center justify-center mb-4">
+          <Plug size={44} className="text-[#0F9D58]" strokeWidth={1.5} />
+        </div>
+        <div className="flex gap-1.5 mb-4 overflow-x-auto no-scrollbar">
+          {tabs.map((tb) => (
+            <button
+              key={tb.id}
+              onClick={() => setTab(tb.id)}
+              className={`px-3 py-1.5 rounded-full text-[12.5px] font-semibold whitespace-nowrap transition-colors ${
+                tab === tb.id ? "bg-[#0F9D58] text-white" : "bg-slate-100 text-slate-500"
+              }`}
+            >
+              {tb.label}
+            </button>
+          ))}
+        </div>
+        <h2 className="font-extrabold text-slate-800 text-[16px] mb-1">
+          {device.name[lang]}{" "}
+          <span className="text-slate-400 font-medium text-[13px]">({device.full[lang]})</span>
+        </h2>
+        <p className="text-[13.5px] text-slate-600 leading-relaxed mb-4">{device.tabs[tab][lang]}</p>
+        <button className="w-full bg-[#0B2F5E] text-white font-semibold text-[13px] py-2.5 rounded-xl flex items-center justify-center gap-2">
+          <PlayCircle size={16} /> {t.watchVideo}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DiagramsScreen({ t, lang }) {
+  return (
+    <div className="p-4 space-y-2.5 pb-6">
+      {DIAGRAMS.map((d) => (
+        <div key={d.id} className="flex gap-3 items-center bg-white rounded-2xl p-3 border border-slate-100 shadow-sm">
+          <div className="w-14 h-14 rounded-xl bg-[#E08A00]/10 flex items-center justify-center shrink-0">
+            <GitBranch size={20} color="#E08A00" />
+          </div>
+          <div className="min-w-0">
+            <div className="font-semibold text-slate-800 text-[13.5px]">{d[lang].name}</div>
+            <div className="text-[12px] text-slate-500 leading-snug">{d[lang].desc}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SafetyScreen({ t, lang }) {
+  return (
+    <div className="p-4 space-y-2.5 pb-6">
+      {SAFETY_TIPS.map((s, i) => (
+        <div key={i} className="flex gap-3 bg-white rounded-2xl p-3.5 border border-slate-100 shadow-sm">
+          <ShieldCheck size={18} className="text-red-500 shrink-0 mt-0.5" />
+          <p className="text-[13px] text-slate-600 leading-snug">{s[lang]}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AboutScreen({ t, lang }) {
+  return (
+    <div className="p-6 flex flex-col items-center text-center pb-10">
+      <div className="w-16 h-16 rounded-full border-4 border-[#1552B8] flex items-center justify-center mb-4">
+        <Zap size={28} color="#1552B8" fill="#1552B8" />
+      </div>
+      <h2 className="font-extrabold text-slate-800 text-[17px] mb-1">{UI.en.appName} / {UI.am.appName}</h2>
+      <p className="text-[13px] text-slate-500 max-w-xs mb-4">
+        {lang === "en"
+          ? "A bilingual companion for learning electrical devices, basic theory, circuit diagrams and safety practices."
+          : "የኤሌክትሪክ መሳሪያዎችን፣ መሰረታዊ ንድፈ ሃሳብን፣ የወረዳ ዲያግራሞችንና የደህንነት ልምዶችን ለመማር የሚያግዝ ባለሁለት ቋንቋ መተግበሪያ።"}
+      </p>
+      <div className="text-[12px] text-slate-400">{t.developedBy}</div>
+    </div>
+  );
+}
+
+/* ---- Quiz -------------------------------------------------------- */
+
+function QuizMenuScreen({ t, lang, onPick }) {
+  return (
+    <div className="p-4 pb-6">
+      <div className="rounded-2xl p-5 text-white mb-5 flex items-center gap-3" style={{ background: "linear-gradient(135deg,#7C3AED,#4C1D95)" }}>
+        <Award size={30} />
+        <div>
+          <div className="font-bold text-[15px]">{t.testKnowledge}</div>
+        </div>
+      </div>
+      <div className="font-bold text-slate-700 text-[13px] mb-2.5">{t.chooseCategory}</div>
+      <div className="space-y-2.5">
+        {QUIZ_CATEGORIES.map((c) => (
+          <SectionCard
+            key={c.id}
+            icon={HelpCircle}
+            title={c[lang].name}
+            subtitle={`${c.questions.length} ${t.questions}`}
+            onClick={() => onPick(c.id)}
+            tint={c.color}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function QuizRunScreen({ t, lang, category, onExit }) {
+  const [idx, setIdx] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+
+  const q = category.questions[idx];
+  const c = q[lang];
+
+  function choose(i) {
+    if (selected !== null) return;
+    setSelected(i);
+    if (i === q.answer) setScore((s) => s + 1);
+  }
+
+  function next() {
+    if (idx + 1 < category.questions.length) {
+      setIdx(idx + 1);
+      setSelected(null);
+    } else {
+      setDone(true);
+    }
+  }
+
+  if (done) {
+    const pct = Math.round((score / category.questions.length) * 100);
+    return (
+      <div className="p-6 flex flex-col items-center text-center pb-10">
+        <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ background: `${category.color}18` }}>
+          <Award size={34} color={category.color} />
+        </div>
+        <div className="text-[13px] text-slate-500 mb-1">{t.yourScore}</div>
+        <div className="text-3xl font-extrabold text-slate-800 mb-1">
+          {score} / {category.questions.length}
+        </div>
+        <div className="text-[13px] font-semibold mb-6" style={{ color: category.color }}>{pct}%</div>
+        <div className="flex gap-2 w-full max-w-xs">
+          <button
+            onClick={() => { setIdx(0); setSelected(null); setScore(0); setDone(false); }}
+            className="flex-1 flex items-center justify-center gap-1.5 bg-slate-100 text-slate-600 font-semibold text-[13px] py-2.5 rounded-xl"
+          >
+            <RotateCcw size={14} /> {t.tryAgain}
+          </button>
+          <button
+            onClick={onExit}
+            className="flex-1 bg-[#0B2F5E] text-white font-semibold text-[13px] py-2.5 rounded-xl"
+          >
+            {t.backToQuiz}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 pb-6">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[12px] font-semibold text-slate-400">
+          {idx + 1} {t.of} {category.questions.length}
+        </span>
+        <span className="text-[12px] font-bold" style={{ color: category.color }}>{category[lang].name}</span>
+      </div>
+      <div className="h-1.5 bg-slate-100 rounded-full mb-5 overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${((idx + (selected !== null ? 1 : 0)) / category.questions.length) * 100}%`, background: category.color }}
+        />
+      </div>
+      <h2 className="font-bold text-slate-800 text-[15.5px] mb-4 leading-snug">{c.q}</h2>
+      <div className="space-y-2.5 mb-5">
+        {c.options.map((opt, i) => {
+          const isAnswer = i === q.answer;
+          const isChosen = i === selected;
+          let style = "bg-white border-slate-200 text-slate-700";
+          if (selected !== null) {
+            if (isAnswer) style = "bg-emerald-50 border-emerald-400 text-emerald-700";
+            else if (isChosen) style = "bg-red-50 border-red-400 text-red-600";
+          }
+          return (
+            <button
+              key={i}
+              onClick={() => choose(i)}
+              className={`w-full text-left border rounded-xl px-3.5 py-2.5 text-[13.5px] font-medium flex items-center justify-between ${style}`}
+            >
+              {opt}
+              {selected !== null && isAnswer && <CheckCircle2 size={17} className="text-emerald-500 shrink-0" />}
+              {selected !== null && isChosen && !isAnswer && <XCircle size={17} className="text-red-500 shrink-0" />}
+            </button>
+          );
+        })}
+      </div>
+      {selected !== null && (
+        <button
+          onClick={next}
+          className="w-full text-white font-semibold text-[13.5px] py-2.5 rounded-xl"
+          style={{ background: category.color }}
+        >
+          {idx + 1 < category.questions.length ? t.next : t.finish}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Root app                                                             */
+/* ------------------------------------------------------------------ */
+
+export default function AdduElectricalLearning() {
+  const [lang, setLang] = useState("am");
+  const [screen, setScreen] = useState("home");
+  const [deviceId, setDeviceId] = useState(null);
+  const [quizCatId, setQuizCatId] = useState(null);
+
+  const t = UI[lang];
+
+  const titles = {
+    home: t.appName,
+    basics: t.basicElectricity,
+    devices: t.electricalDevices,
+    device: DEVICES.find((d) => d.id === deviceId)?.name[lang] ?? "",
+    diagrams: t.circuitDiagrams,
+    safety: t.electricalSafety,
+    about: t.about,
+    quiz: t.quiz,
+    quizRun: QUIZ_CATEGORIES.find((c) => c.id === quizCatId)?.[lang]?.name ?? "",
+  };
+
+  const backable = screen !== "home";
+  const showBottomNav = ["home", "basics", "devices", "diagrams", "quiz"].includes(screen);
+
+  function handleBack() {
+    if (screen === "device") setScreen("devices");
+    else if (screen === "quizRun") setScreen("quiz");
+    else setScreen("home");
+  }
+
+  return (
+    <div
+      className="mx-auto w-full max-w-md min-h-screen flex flex-col bg-[#F5F7FB]"
+      dir="ltr"
+      style={{ fontFamily: "'Segoe UI', system-ui, sans-serif" }}
+    >
+      <TopBar
+        t={t}
+        title={titles[screen] || t.appName}
+        onBack={backable ? handleBack : null}
+        lang={lang}
+        setLang={setLang}
+      />
+
+      <div className="flex-1 overflow-y-auto">
+        {screen === "home" && <HomeScreen t={t} lang={lang} setScreen={setScreen} />}
+
+        {screen === "basics" && (
+          <>
+            <BasicsScreen t={t} lang={lang} />
+          </>
+        )}
+
+        {screen === "devices" && (
+          <DevicesScreen
+            t={t}
+            lang={lang}
+            onOpen={(id) => {
+              setDeviceId(id);
+              setScreen("device");
+            }}
+          />
+        )}
+
+        {screen === "device" && deviceId && (
+          <DeviceDetailScreen t={t} lang={lang} device={DEVICES.find((d) => d.id === deviceId)} />
+        )}
+
+        {screen === "diagrams" && <DiagramsScreen t={t} lang={lang} />}
+
+        {screen === "safety" && <SafetyScreen t={t} lang={lang} />}
+
+        {screen === "about" && <AboutScreen t={t} lang={lang} />}
+
+        {screen === "quiz" && (
+          <QuizMenuScreen
+            t={t}
+            lang={lang}
+            onPick={(id) => {
+              setQuizCatId(id);
+              setScreen("quizRun");
+            }}
+          />
+        )}
+
+        {screen === "quizRun" && quizCatId && (
+          <QuizRunScreen
+            t={t}
+            lang={lang}
+            category={QUIZ_CATEGORIES.find((c) => c.id === quizCatId)}
+            onExit={() => setScreen("quiz")}
+          />
+        )}
+      </div>
+
+      {showBottomNav && <BottomNav t={t} screen={screen} setScreen={setScreen} />}
+    </div>
+  );
+}
